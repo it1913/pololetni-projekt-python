@@ -1,43 +1,93 @@
+import math
 import pygame
-from utils import load_assets
 
-class Asteroids:
-    pass
+FPS = 60
+SCREEN_HEIGHT = 600
+SCREEN_WIDTH = 800
 
-class Game:
+
+bg = pygame.image.load('assets/background.jpg')
+spaceShip = pygame.image.load('assets/spaceship.jpg')
+
+pygame.display.set_caption('Asteroids')
+window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+
+clock = pygame.time.Clock()
+
+gameover = False
+
+
+
+class Ship(object):
     def __init__(self):
-        self._init_pygame()
-        self.screen = pygame.display.set_mode((800, 600))
-        self.background = load_assets("background", False)
-        
-    def main_loop(self):
-        while True:
-            self._handle_input()
-            self._process_game_logic()
-            self._draw()
+        self.img = spaceShip
+        self.w = self.img.get_width()
+        self.h = self.img.get_height()
+        self.x = SCREEN_WIDTH//2
+        self.y = SCREEN_HEIGHT//2
+        self.angle = 0
+        self.rotationSurf = pygame.transform.rotate(self.img, self.angle)
+        self.rotationRect = self.rotationSurf.get_rect()
+        self.rotationRect.center = (self.x, self.y)
+        self.cosine = math.cos(math.radians(self.angle + 90))
+        self.sine = math.sin(math.radians((self.angle + 90)))
+        self.head = (self.x + self.cosine + self.w//2, self.y - self.sine * self.h//2)
 
-    def _init_pygame(self):
-        pygame.init()
-        pygame.display.set_caption("Space Rocks")
+    def draw(self, window):
+        window.blit(self.rotationSurf, self.rotationRect)
 
-    def _handle_input(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT or (
-                event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE
-            ):
-                quit()
+    def turnLeft(self):
+        self.angle += 5
+        self.rotationSurf = pygame.transform.rotate(self.img, self.angle)
+        self.rotationRect = self.rotationSurf.get_rect()
+        self.rotationRect.center = (self.x, self.y)
+        self.cosine = math.cos(math.radians(self.angle + 90))
+        self.sine = math.sin(math.radians(self.angle + 90))
+        self.head= (self.x + self.cosine + self.w//2, self.y - self.sine * self.h//2)
 
-    def _process_game_logic(self):
-        pass
+    def turnRight(self):
+        self.angle -= 5
+        self.rotationSurf = pygame.transform.rotate(self.img, self.angle)
+        self.rotationRect = self.rotationSurf.get_rect()
+        self.rotationRect.center = (self.x, self.y)
+        self.cosine = math.cos(math.radians(self.angle + 90))
+        self.sine = math.sin(math.radians(self.angle + 90))
+        self.head= (self.x + self.cosine + self.w//2, self.y - self.sine * self.h//2)
 
-    def _draw(self):
-        self.screen.blit(self.background, (0, 0))
-        pygame.display.flip()
+    def moveForward(self):
+        self.x += self.cosine *6
+        self.y -= self.sine *6
+        self.rotationSurf = pygame.transform.rotate(self.img, self.angle)
+        self.rotationRect = self.rotationSurf.get_rect()
+        self.rotationRect.center = (self.x, self.y)
+        self.cosine = math.cos(math.radians(self.angle + 90))
+        self.sine = math.sin(math.radians(self.angle + 90))
+        self.head = (self.x + self.cosine + self.w // 2, self.y - self.sine * self.h // 2)
 
-class Ship:
-    pass
 
+player= Ship()
 
-if __name__ == "__main__":
-    game = Game()
-    game.main_loop()
+def redrawGameWindow():
+    window.blit(bg, (0,0))
+    player.draw(window)
+    pygame.display.update()
+
+run= True
+
+while run:
+    clock.tick(FPS)
+    if not gameover:
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            player.turnLeft()
+        if keys[pygame.K_RIGHT]:
+            player.turnRight()
+        if keys[pygame.K_UP]:
+                player.moveForward()
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            run = False
+
+    redrawGameWindow()
+pygame.quit()
