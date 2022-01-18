@@ -7,7 +7,7 @@ SCREEN_WIDTH = 800
 
 
 bg = pygame.image.load('assets/background.jpg')
-spaceShip = pygame.image.load('assets/spaceship.jpg')
+spaceShip = pygame.image.load('assets/spaceship.png')
 
 pygame.display.set_caption('Asteroids')
 window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -16,7 +16,14 @@ clock = pygame.time.Clock()
 
 gameover = False
 
+class Game():
+    pass
 
+class Asteroid():
+    pass
+
+class Bullet():
+    pass
 
 class Ship(object):
     def __init__(self):
@@ -55,14 +62,16 @@ class Ship(object):
         self.head= (self.x + self.cosine + self.w//2, self.y - self.sine * self.h//2)
 
     def moveForward(self):
-        self.x += self.cosine *6
-        self.y -= self.sine *6
+        self.x += self.cosine *2
+        self.y -= self.sine *2
         self.rotationSurf = pygame.transform.rotate(self.img, self.angle)
         self.rotationRect = self.rotationSurf.get_rect()
         self.rotationRect.center = (self.x, self.y)
         self.cosine = math.cos(math.radians(self.angle + 90))
         self.sine = math.sin(math.radians(self.angle + 90))
         self.head = (self.x + self.cosine + self.w // 2, self.y - self.sine * self.h // 2)
+        self.movement = True
+
 
 
 player= Ship()
@@ -74,6 +83,8 @@ def redrawGameWindow():
 
 run= True
 
+
+
 while run:
     clock.tick(FPS)
     if not gameover:
@@ -84,6 +95,8 @@ while run:
             player.turnRight()
         if keys[pygame.K_UP]:
                 player.moveForward()
+
+
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
