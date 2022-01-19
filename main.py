@@ -65,6 +65,7 @@ class Ship(object):
         self.head= (self.x + self.cosine + self.w//2, self.y - self.sine * self.h//2)
 
     def moveForward(self):
+        # Akcelerace a tření/zpomalování lodě
         if self.movement is True:
             self.xx += self.cosine * 0.1
             self.yy -= self.sine * 0.1
@@ -74,7 +75,7 @@ class Ship(object):
         elif self.movement is False and (self.xx > 0.0 or self.yy > 0.0):
             self.xx -= self.xx * 0.05
             self.yy -= self.yy * 0.05
-        print(self.xx)
+        # print(self.xx)
         # print(self.yy)
         self.x += self.xx
         self.y += self.yy
@@ -84,6 +85,16 @@ class Ship(object):
         self.cosine = math.cos(math.radians(self.angle + 90))
         self.sine = math.sin(math.radians(self.angle + 90))
         self.head = (self.x + self.cosine + self.w // 2, self.y - self.sine * self.h // 2)
+        # Ošetření okrajů
+        if self.x < 0 - self.w:
+            self.x = SCREEN_WIDTH
+        elif self.x > SCREEN_WIDTH + self.w:
+            self.x = 0 - self.w
+
+        if self.y < 0 - self.h:
+            self.y = SCREEN_HEIGHT
+        elif self.y > SCREEN_HEIGHT + self.h:
+            self.y = 0 - self.h
 
 
 
