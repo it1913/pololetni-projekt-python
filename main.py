@@ -196,7 +196,7 @@ while run:
     # print(len(asteroid))
     player.moveForward()
     if not gameover:
-        if count % 50 == 0:
+        if count % 25 == 0:
             asteroid.append(Asteroid())
 
         for b in playerBullet:
@@ -209,7 +209,10 @@ while run:
             a.y += a.yVelocity
             if a.borderCollision():
                 asteroid.pop(asteroid.index(a))
-
+            #Kolize lodě a asteroidu
+            if (player.x >= a.x and player.x <= a.x + a.aWidth) or player.x + player.w >= a.x and player.x + player.w <= a.x + a.aWidth:
+                if (player.y >= a.y and player.y <= a.y + a.aHeight) or player.y + player.h >= a.y and player.y + player.h <= a.y + a.aHeight:
+                    run = False
             #Kolize střel a asteroidů
             for b in playerBullet:
                 if(b.x >= a.x and b.x <= a.x + a.aWidth) or b.x + b.bWidth >= a.x and b.x + b.bWidth <= a.x + a.aWidth:
