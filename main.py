@@ -4,10 +4,11 @@ import pygame
 FPS = 60
 SCREEN_HEIGHT = 600
 SCREEN_WIDTH = 800
-
+playerBullet = []
 
 bg = pygame.image.load('assets/background.jpg')
 spaceShip = pygame.image.load('assets/spaceship.png')
+rocket = pygame.image.load('assets/rocket.png')
 
 pygame.display.set_caption('Asteroids')
 window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -19,13 +20,7 @@ gameover = False
 class Game():
     pass
 
-class Asteroid():
-    pass
-
-class Bullet():
-    pass
-
-class Ship(object):
+class Ship():
     def __init__(self):
         self.img = spaceShip
         self.w = self.img.get_width()
@@ -41,7 +36,7 @@ class Ship(object):
         self.rotationRect.center = (self.x, self.y)
         self.cosine = math.cos(math.radians(self.angle + 90))
         self.sine = math.sin(math.radians((self.angle + 90)))
-        self.head = (self.x + self.cosine + self.w//2, self.y - self.sine * self.h//2)
+        self.head = (self.x + self.cosine * self.w//2, self.y - self.sine * self.h//2)
 
     def draw(self, window):
         window.blit(self.rotationSurf, self.rotationRect)
@@ -53,7 +48,7 @@ class Ship(object):
         self.rotationRect.center = (self.x, self.y)
         self.cosine = math.cos(math.radians(self.angle + 90))
         self.sine = math.sin(math.radians(self.angle + 90))
-        self.head= (self.x + self.cosine + self.w//2, self.y - self.sine * self.h//2)
+        self.head= (self.x + self.cosine * self.w//2, self.y - self.sine * self.h//2)
 
     def turnRight(self):
         self.angle -= 5
@@ -62,7 +57,7 @@ class Ship(object):
         self.rotationRect.center = (self.x, self.y)
         self.cosine = math.cos(math.radians(self.angle + 90))
         self.sine = math.sin(math.radians(self.angle + 90))
-        self.head= (self.x + self.cosine + self.w//2, self.y - self.sine * self.h//2)
+        self.head= (self.x + self.cosine * self.w//2, self.y - self.sine * self.h//2)
 
     def moveForward(self):
         # Akcelerace a tření/zpomalování lodě
@@ -84,7 +79,7 @@ class Ship(object):
         self.rotationRect.center = (self.x, self.y)
         self.cosine = math.cos(math.radians(self.angle + 90))
         self.sine = math.sin(math.radians(self.angle + 90))
-        self.head = (self.x + self.cosine + self.w // 2, self.y - self.sine * self.h // 2)
+        self.head = (self.x + self.cosine * self.w // 2, self.y - self.sine * self.h // 2)
         # Ošetření okrajů
         if self.x < 0 - self.w:
             self.x = SCREEN_WIDTH
@@ -97,12 +92,51 @@ class Ship(object):
             self.y = 0 - self.h
 
 
+class Bullet():
+    def __init__(self):
+        self.img = rocket
+        self.shipPoint = player.head
+        self.x, self.y = self.shipPoint
+        self.shipRotation = pygame.transform.rotate(self.img, player.angle)
+        self.shipRotationRect = self.shipRotation.get_rect()
+        self.bWidth = self.img.get_width()
+        self.bHeight = self.img.get_height()
+        self.c = 0.8
+        self.s = 0.8
+        self.xVelocity = self.c * 10 * player.cosine
+        self.yVelocity = self.c * 10 * player.sine
 
-player= Ship()
+    def move(self):
+        self.x += self.xVelocity
+        self.y -= self.yVelocity
+        self.shipRotationRect.center = (self.x, self.y)
+
+    def draw(self, window):
+        window.blit(self.shipRotation, self.shipRotationRect)
+
+    def borderCollision(self):
+        if self.x < 0 - self.bWidth:
+            return True
+        elif self.x > SCREEN_WIDTH + self.bWidth:
+            return True
+
+        if self.y < 0 - self.bHeight:
+            return True
+        elif self.y > SCREEN_HEIGHT + self.bHeight:
+            return True
+
+class Asteroid():
+    def __init__(self):
+        pass
+
+
+player = Ship()
 
 def redrawGameWindow():
     window.blit(bg, (0,0))
     player.draw(window)
+    for b in playerBullet:
+        b.draw(window)
     pygame.display.update()
 
 run= True
@@ -113,6 +147,11 @@ while run:
     clock.tick(FPS)
     player.moveForward()
     if not gameover:
+        for b in playerBullet:
+            b.move()
+            if b.borderCollision():
+                playerBullet.pop(playerBullet.index(b))
+
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             player.turnLeft()
@@ -125,6 +164,9 @@ while run:
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_UP:
                     player.movement = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    playerBullet.append(Bullet())
 
                     # print(player.movement)
             elif event.type == pygame.QUIT:
